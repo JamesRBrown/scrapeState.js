@@ -17,15 +17,15 @@ Scrape State of events and to use PhantomJS's "onLoadStarted"
 and "onLoadFinished" to notify Scrape State of page loads.
 */
 
-module.exports = (function(){
+function scrapeState(){
     var events = 0;                 //track events
     var lastEventCount = 0;         //events since last evaluation
     var started = false;            //Has Scrape State been started
-    var pageLoading = false;        //track page loads
-    var stageRunning = false;       //trank if we're in the stage process
+    var pageLoading = false;        //track page loading state
+    var stageRunning = false;       //track if we're in stage processing
     var funcArray = [];             //registered functions
-    var stageOneTime = 200;         //time to wait in stage one
-    var stageTwoTime = 1000;        //time to wait in stage two
+    var stageOneTime = 200;         //time to wait before stage one
+    var stageTwoTime = 1000;        //time to wait before stage two
     
     var start = function(){
         if(!started){
@@ -42,7 +42,12 @@ module.exports = (function(){
     
     var pageLoadFinished = function(){
         pageLoading = false;
-        if(started && !stageRunning){
+        stageZero();
+    };
+    
+    var stageZero = function(){
+        if(started && !pageLoading && !stageRunning){
+            stageRunning = true;
             events = 0;
             lastEventCount = 0;
             stageOne();
@@ -50,34 +55,36 @@ module.exports = (function(){
     };
         
     var stageOne = function(){
-        if(pageLoading) stageComplete();
-        
-        if(stageRunning){
+        if(started && !pageLoading && stageRunning){
             if(events === lastEventCount){
                 setTimeout(stageTwo, stageTwoTime);
             }else{
                 lastEventCount = events;
                 setTimeout(stageOne, stageOneTime);
             }  
+        }else{
+            stageComplete();
         }
               
     };
     
     var stageTwo = function(){
-        if(pageLoading) stageComplete();
-        
-        if(stageRunning){
+        if(started && !pageLoading && stageRunning){
             if(events === lastEventCount){
                 runNextFunction();
             }else{
                 stageOne();
             }
+        }else{
+            stageComplete();
         }
         
     };
     
     var runNextFunction = function(){
+        stageComplete();
         funcArray.shift()();
+        if(!funcArray.length) started = false; //completed
     };
     
     var stageComplete = function(){
@@ -104,6 +111,9 @@ module.exports = (function(){
         }
     };
     
+    var test = function(){
+        console.log("Scrape State Loaded!");
+    };
     
     
     return {
@@ -113,6 +123,7 @@ module.exports = (function(){
         incrementEvents: incrementEvents,
         addFunction: addFunction,
         setStageOneTime: setStageOneTime,
-        setStageTwoTime: setStageTwoTime
+        setStageTwoTime: setStageTwoTime,
+        test: test
     };
-})();
+};
