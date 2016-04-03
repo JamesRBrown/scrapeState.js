@@ -12,12 +12,11 @@ The user simply adds functions to Scrape Stage and then kicks off
 the process with "start".
 
 Setup:
-To set this up, be sure to use PhantomJS's events to notify
-Scrape State of events and to use PhantomJS's "onLoadStarted"
-and "onLoadFinished" to notify Scrape State of page loads.
+Setup can be manually configured, or you can pass in your page obj
+and Scrape State will initialize itself.
 */
 
-function scrapeState(){
+function scrapeState(page){
     var events = 0;                 //track events
     var lastEventCount = 0;         //events since last evaluation
     var started = false;            //Has Scrape State been started
@@ -26,6 +25,30 @@ function scrapeState(){
     var funcArray = [];             //registered functions
     var stageOneTime = 200;         //time to wait before stage one
     var stageTwoTime = 1000;        //time to wait before stage two
+    
+    (function(){
+        if(page){
+            page.onLoadStarted = function(){
+                pageLoadStarted();
+            };
+            page.onLoadFinished = function(){
+                pageLoadFinished();
+            };
+            page.onResourceRequested = function(requestData, networkRequest) {
+                incrementEvents();
+            };
+            page.onResourceReceived = function(response) {
+                incrementEvents();
+            };
+            page.onResourceError = function(resourceError) {
+                incrementEvents();
+            };
+            page.onResourceTimeout = function(request) {
+                incrementEvents();
+            };
+        }
+    })();
+    
     
     var start = function(){
         if(!started){
@@ -111,19 +134,24 @@ function scrapeState(){
         }
     };
     
+    
+    
     var test = function(){
         console.log("Scrape State Loaded!");
     };
     
-    
-    return {
-        start: start,
+    var manualSetup = {
         pageLoadStarted: pageLoadStarted,
         pageLoadFinished: pageLoadFinished,
         incrementEvents: incrementEvents,
-        addFunction: addFunction,
         setStageOneTime: setStageOneTime,
-        setStageTwoTime: setStageTwoTime,
+        setStageTwoTime: setStageTwoTime
+    };
+    
+    return {
+        start: start,
+        manualSetup: manualSetup,
+        addFunction: addFunction,        
         test: test
     };
 };
