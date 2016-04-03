@@ -134,8 +134,6 @@ function scrapeState(page){
         }
     };
     
-    
-    
     var test = function(){
         console.log("Scrape State Loaded!");
     };
