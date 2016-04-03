@@ -1,4 +1,3 @@
-# scrapeState.js
 Title: Scrape State
 Author: James R Brown
 Date: 4.2.16
@@ -12,6 +11,5 @@ The user simply adds functions to Scrape Stage and then kicks off
 the process with "start".
 
 Setup:
-To set this up, be sure to use PhantomJS's events to notify
-Scrape State of events and to use PhantomJS's "onLoadStarted"
-and "onLoadFinished" to notify Scrape State of page loads.
+Setup can be manually configured, or you can pass in your page obj
+and Scrape State will initialize itself.
