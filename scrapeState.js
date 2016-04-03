@@ -148,8 +148,8 @@ function scrapeState(page){
     
     return {
         start: start,
+        addFunction: addFunction,   
         manualSetup: manualSetup,
-        addFunction: addFunction,        
         test: test
     };
 };
